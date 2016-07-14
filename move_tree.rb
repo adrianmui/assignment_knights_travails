@@ -24,19 +24,46 @@ class MoveTree
   end
 
   def build_tree
-    holder = [@root]
-    depth = @root.depth
-    until depth >= max_depth
-      depth = holder[0].depth + 1 #depth of child
-      holder.each do |holder_move|
-        # iterates to add all possible moves
-        possible_moves([holder_move.x, holder_move.y]).each do |arr|
-          arr.each_slice(2) do |x,y|
-            # binding.pry
-            holder_move.children << Move.new(x, y, depth, [], holder) if valid_move?(x, y)
+    # start at root, enqueue root
+    # enqueue all root's children
+    # dequeue root & compare to value
+    # enqueue all children's children
+    # dequeue root's children & compare to value
+    # continue...
+    # when no more children, over. 
+
+
+
+    holder = @root # Move.new(coord[0], coord[1], 0, [], nil)
+    depth = @root.depth # depth = 0
+    num_child = holder.children.length #number of moves
+
+
+
+    until depth >= max_depth   
+      holder.children.each do |child|
+        #add first level because children is empty at depth level 0 / root
+        if depth == 0
+           possible_moves([holder.x, holder.y]).each do |arr|
+            arr.each_slice(2) do |x,y|
+              holder_move.children << Move.new(x, y, depth + 1, [], holder) if valid_move?(x, y)
+            end
           end
         end
-      holder = holder[0].children
+
+
+        depth = holder.depth + 1 #depth of child , holder[0-7] will hold same value
+        holder.children.each do |holder_move|  # iterates to add all possible moves in depth layer
+          possible_moves([holder_move.x, holder_move.y]).each do |arr|
+            arr.each_slice(2) do |x,y|
+              # binding.pry
+              holder_move.children << Move.new(x, y, depth, [], holder) if valid_move?(x, y)
+            end
+          end
+        end
+
+
+        
       end
     end
   end
@@ -45,6 +72,7 @@ class MoveTree
     x.between?(0, 7) && y.between?(0, 7)
   end
 
+#returns an array of possible moves
   def possible_moves(parent_coord)
     x = parent_coord[0]
     y = parent_coord[1]
